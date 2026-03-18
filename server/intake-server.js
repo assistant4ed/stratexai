@@ -43,6 +43,7 @@ const server = http.createServer(async (req, res) => {
   try {
     // GET / → Intake form
     if (method === 'GET' && pathname === '/') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(buildIntakeForm(url.searchParams.get('order')));
     }
 

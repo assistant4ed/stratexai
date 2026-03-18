@@ -6,7 +6,7 @@
 const https = require('https');
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
-const OPENROUTER_MODEL = 'anthropic/claude-3-5-sonnet'; // Sonnet 4.6 via OpenRouter
+const OPENROUTER_MODEL = 'anthropic/claude-3-5-sonnet-20241022'; // Claude 3.5 Sonnet (latest)
 
 /**
  * Generate comprehensive business intelligence report
