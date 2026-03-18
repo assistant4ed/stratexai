@@ -1,0 +1,17 @@
+{
+  "name": "stratexai",
+  "version": "1.0.0",
+  "description": "AI Business Intelligence Platform",
+  "main": "server/intake-server.js",
+  "scripts": {
+    "start": "node server/intake-server.js",
+    "dev": "node server/intake-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.3"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
