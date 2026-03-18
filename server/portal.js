@@ -6,8 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { reviseReport } = require('./report-generator');
-
-const REPORTS_DIR = path.join(__dirname, 'reports');
+const db = require('./db');
 const GMAIL_USER = process.env.GMAIL_USER || 'hobbychan111@gmail.com';
 const GMAIL_PASS = process.env.GMAIL_PASS || 'cglkzcimgnhsbphs';
 
@@ -174,20 +173,11 @@ async function handlePortalRoutes(req, res, pathname, method) {
     // GET /portal/:orderId
     if (method === 'GET' && pathname.startsWith('/portal/')) {
       const orderId = pathname.replace('/portal/', '');
-      const reportFile = path.join(REPORTS_DIR, orderId + '.html');
-      const feedbackFile = path.join(REPORTS_DIR, orderId + '.feedback.json');
-      const metaFile = path.join(REPORTS_DIR, orderId + '.meta.json');
+      const report = db.getReport(orderId);
       
-      const reportExists = fs.existsSync(reportFile);
-      const feedbackExists = fs.existsSync(feedbackFile);
-      let businessName = '';
-      
-      if (fs.existsSync(metaFile)) {
-        try {
-          const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
-          businessName = meta.business_name || '';
-        } catch (e) {}
-      }
+      const reportExists = !!report && !!report.html;
+      const feedbackExists = report && !!report.feedback;
+      const businessName = report && report.meta ? report.meta.business_name : '';
       
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(buildPortalPage(orderId, reportExists, feedbackExists, businessName));
@@ -204,11 +194,8 @@ async function handlePortalRoutes(req, res, pathname, method) {
         const feedback = params.get('feedback') || '';
         
         // Save feedback
-        const feedbackFile = path.join(REPORTS_DIR, orderId + '.feedback.json');
-        fs.writeFileSync(feedbackFile, JSON.stringify({
-          feedback,
-          timestamp: new Date().toISOString()
-        }));
+        const rating = params.get('rating') || '3';
+        db.updateReportFeedback(orderId, feedback, rating);
         
         // Redirect immediately
         res.writeHead(302, { Location: `/portal/${orderId}` });
@@ -216,31 +203,21 @@ async function handlePortalRoutes(req, res, pathname, method) {
         
         // Revise report in background
         try {
-          const reportFile = path.join(REPORTS_DIR, orderId + '.html');
-          if (!fs.existsSync(reportFile)) return;
+          const report = db.getReport(orderId);
+          if (!report || !report.html) return;
           
-          const originalHtml = fs.readFileSync(reportFile, 'utf8');
-          const metaFile = path.join(REPORTS_DIR, orderId + '.meta.json');
-          let businessName = 'Your Business';
-          
-          if (fs.existsSync(metaFile)) {
-            try {
-              const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
-              businessName = meta.business_name || businessName;
-            } catch (e) {}
-          }
+          const originalHtml = report.html;
+          const businessName = report.meta && report.meta.business_name ? report.meta.business_name : 'Your Business';
           
           console.log(`[Revision] Processing feedback for ${orderId}`);
           const revisedHtml = await reviseReport(originalHtml, feedback, businessName);
           
           // Save revised report
-          const revisedFile = path.join(REPORTS_DIR, orderId + '-revised.html');
-          fs.writeFileSync(revisedFile, revisedHtml);
+          db.saveRevisedReport(orderId, revisedHtml);
           
           // Email revised report
-          const metaData = fs.existsSync(metaFile) ? JSON.parse(fs.readFileSync(metaFile, 'utf8')) : {};
-          if (metaData.email) {
-            await sendRevisionEmail(metaData.email, businessName, orderId, revisedFile);
+          if (report.meta && report.meta.email) {
+            await sendRevisionEmail(report.meta.email, businessName, orderId, revisedHtml);
           }
         } catch (err) {
           console.error('[ERROR] Revision failed:', err.message);
@@ -282,7 +259,7 @@ async function handlePortalRoutes(req, res, pathname, method) {
 }
 
 // ─── Email Revised Report ─────────────────────────────────────────────────
-async function sendRevisionEmail(to, businessName, orderId, reportFile) {
+async function sendRevisionEmail(to, businessName, orderId, revisedHtml) {
   try {
     const nodemailer = require('nodemailer');
     const transporter = nodemailer.createTransport({
@@ -299,13 +276,9 @@ async function sendRevisionEmail(to, businessName, orderId, reportFile) {
 <body style="font-family:Arial,sans-serif;color:#2d3748;">
 <h2>Revised Report Ready ✅</h2>
 <p>Based on your feedback, we've improved your Business Intelligence Report for <strong>${businessName}</strong>.</p>
-<p><a href="https://app.stratexai.io/portal/${orderId}" style="display:inline-block;background:#0a1628;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">View Revised Report →</a></p>
+<p><a href="https://oyster-app-etznq.ondigitalocean.app/portal/${orderId}" style="display:inline-block;background:#0a1628;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">View Revised Report →</a></p>
 </body>
-</html>`,
-      attachments: fs.existsSync(reportFile) ? [{
-        filename: `StratexAI-${orderId}-Revised.html`,
-        path: reportFile
-      }] : []
+</html>`
     };
 
     await transporter.sendMail(mailOptions);

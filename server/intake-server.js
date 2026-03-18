@@ -11,14 +11,9 @@ const path = require('path');
 const crypto = require('crypto');
 const { generateReport, reviseReport } = require('./report-generator');
 const { handlePortalRoutes } = require('./portal');
+const db = require('./db');
 
 const PORT = process.env.PORT || 19001;
-const REPORTS_DIR = path.join(__dirname, 'reports');
-
-// Ensure reports directory exists
-if (!fs.existsSync(REPORTS_DIR)) {
-  fs.mkdirSync(REPORTS_DIR, { recursive: true });
-}
 
 // Validate environment
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
@@ -71,23 +66,23 @@ const server = http.createServer(async (req, res) => {
     // GET /report/:orderId → View report HTML
     if (method === 'GET' && pathname.startsWith('/report/')) {
       const orderId = pathname.replace('/report/', '');
-      const reportFile = path.join(REPORTS_DIR, orderId + '.html');
+      const reportHtml = db.getReportHtml(orderId) || db.getRevisedReport(orderId);
       
-      if (!fs.existsSync(reportFile)) {
+      if (!reportHtml) {
         res.writeHead(404);
         return res.end(build404Page());
       }
       
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      return res.end(fs.readFileSync(reportFile));
+      return res.end(reportHtml);
     }
 
     // GET /download/:orderId → Download report as file
     if (method === 'GET' && pathname.startsWith('/download/')) {
       const orderId = pathname.replace('/download/', '');
-      const reportFile = path.join(REPORTS_DIR, orderId + '.html');
+      const reportHtml = db.getReportHtml(orderId) || db.getRevisedReport(orderId);
       
-      if (!fs.existsSync(reportFile)) {
+      if (!reportHtml) {
         res.writeHead(404);
         return res.end('Report not found');
       }
@@ -96,7 +91,7 @@ const server = http.createServer(async (req, res) => {
         'Content-Type': 'text/html',
         'Content-Disposition': `attachment; filename="StratexAI-Report-${orderId}.html"`
       });
-      return res.end(fs.readFileSync(reportFile));
+      return res.end(reportHtml);
     }
 
     // POST /upload-logo/:orderId, POST /feedback/:orderId → Portal routes
@@ -160,21 +155,17 @@ async function handleIntakeSubmission(req, res) {
         
         const reportHtml = await generateReport(formData);
         
-        // Save report
-        const reportFile = path.join(REPORTS_DIR, orderId + '.html');
-        fs.writeFileSync(reportFile, reportHtml);
-        console.log(`[${new Date().toISOString()}] Report saved: ${reportFile}`);
-
-        // Save metadata
-        const metaFile = path.join(REPORTS_DIR, orderId + '.meta.json');
-        fs.writeFileSync(metaFile, JSON.stringify({
+        // Save report to database
+        const meta = {
           order_id: orderId,
           email: formData.email,
           business_name: formData.business_name,
           industry: formData.industry,
           market: formData.market,
           created_at: new Date().toISOString()
-        }));
+        };
+        db.saveReport(orderId, reportHtml, meta);
+        console.log(`[${new Date().toISOString()}] Report saved for order ${orderId}`);
 
         // Send "ready" email
         await sendReportReadyEmail(formData.email, formData.business_name, orderId);
