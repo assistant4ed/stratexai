@@ -4,10 +4,12 @@
   "description": "AI Business Intelligence Platform",
   "main": "server/intake-server.js",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "node server/index.js"
+    "start": "node server/intake-server.js",
+    "dev": "node server/intake-server.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "nodemailer": "^6.9.3"
+  },
   "engines": {
     "node": "18.x"
   }

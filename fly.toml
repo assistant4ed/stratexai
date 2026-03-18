@@ -1,0 +1,30 @@
+app = "stratexai"
+primary_region = "sfo"
+
+[build]
+builder = "heroku"
+
+[env]
+OPENROUTER_API_KEY = "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"
+GMAIL_USER = "hobbychan111@gmail.com"
+GMAIL_PASS = "cglkzcimgnhsbphs"
+PORT = "8080"
+NODE_ENV = "production"
+
+[[services]]
+internal_port = 8080
+processes = ["app"]
+
+  [services.http_checks]
+  enabled = true
+  grace_period = "5s"
+  interval = "30s"
+  timeout = "5s"
+  path = "/health"
+
+[http_service]
+internal_port = 8080
+force_https = true
+auto_start_machines = true
+auto_stop_machines = true
+min_machines_running = 1
