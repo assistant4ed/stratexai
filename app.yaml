@@ -1,0 +1,28 @@
+name: stratexai
+services:
+- name: api
+  github:
+    repo: assistant4ed/stratexai
+    branch: main
+  build_command: npm install
+  run_command: npm start
+  http_port: 19001
+  envs:
+  - key: OPENROUTER_API_KEY
+    value: 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
+  - key: GMAIL_USER
+    value: hobbychan111@gmail.com
+  - key: GMAIL_PASS
+    value: cglkzcimgnhsbphs
+  - key: GMAIL_TO
+    value: hohoho7374@gmail.com
+  - key: NODE_ENV
+    value: production
+  node_version: "18"
+  memory: 512Mi
+  cpu: 250m
+static_sites:
+- name: landing
+  source_dir: landing-page
+  routes:
+  - path: /
