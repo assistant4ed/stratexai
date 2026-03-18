@@ -40,39 +40,14 @@ BUSINESS INFORMATION:
 - Target Customers: ${target_customers || '(Not provided)'}
 - Competitive Advantage: ${competitive_advantage || '(Not provided)'}
 
-Generate a detailed, McKinsey-style HTML report with the following sections:
+Generate a professional HTML business report with these sections:
 
-1. EXECUTIVE SUMMARY (2-3 paragraphs)
-   - High-level business overview
-   - Key market opportunity
-   - Primary recommendation
-
-2. MARKET ANALYSIS
-   - Market size and growth trajectory
-   - Market trends and drivers
-   - Market segmentation
-   - Regulatory environment
-
-3. COMPETITIVE LANDSCAPE
-   - 5-6 key competitors (realistic, based on industry/market)
-   - For each competitor: brief profile, market positioning, strengths, weaknesses
-   - Competitive intensity and barriers to entry
-
-4. SWOT ANALYSIS
-   - STRENGTHS: 4-5 items for this business
-   - WEAKNESSES: 4-5 items for this business
-   - OPPORTUNITIES: 4-5 items in the market
-   - THREATS: 4-5 items to the business
-
-5. STRATEGIC RECOMMENDATIONS
-   - 3-5 actionable recommendations (prioritized)
-   - Include: what, why, how, expected impact
-   - Timeline and key metrics
-
-6. FINANCIAL OUTLOOK & RISK ASSESSMENT
-   - Growth potential ($M ARR 3-year projection)
-   - Key risks and mitigation strategies
-   - Critical success factors
+1. EXECUTIVE SUMMARY (1-2 paragraphs) - overview and key opportunity
+2. MARKET ANALYSIS - size, growth, trends, segmentation  
+3. COMPETITIVE LANDSCAPE - 4-5 main competitors with analysis
+4. SWOT - Strengths, Weaknesses, Opportunities, Threats (3-4 each)
+5. STRATEGIC RECOMMENDATIONS - 3-4 actionable items with expected impact
+6. FINANCIAL OUTLOOK - 3-year projections and key risks
 
 FORMAT: Return ONLY valid HTML (no markdown, no code fences). 
 - Use professional styling (blues, grays, clean typography)
@@ -97,8 +72,8 @@ Make it look like a $5,000 consulting report. Be specific to the industry and ma
           content: prompt
         }
       ],
-      max_tokens: 8000,
-      temperature: 0.7
+      max_tokens: 4000,
+      temperature: 0.6
     });
 
     const options = {
@@ -234,8 +209,8 @@ Return ONLY valid HTML. Start with <!DOCTYPE html> and end with </html>.`;
     const postData = JSON.stringify({
       model: OPENROUTER_MODEL,
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 8000,
-      temperature: 0.7
+      max_tokens: 4000,
+      temperature: 0.6
     });
 
     const options = {
