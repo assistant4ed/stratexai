@@ -1,16 +1,26 @@
 {
   "name": "stratexai",
-  "version": "1.0.0",
-  "description": "AI Business Intelligence Platform",
+  "version": "2.0.0",
+  "description": "AI Business Intelligence Platform — McKinsey-level reports in minutes",
   "main": "server/intake-server.js",
   "scripts": {
     "start": "node server/intake-server.js",
     "dev": "node server/intake-server.js"
   },
-  "dependencies": {
-    "nodemailer": "^6.9.3"
-  },
   "engines": {
-    "node": "18.x"
-  }
+    "node": "18.x",
+    "npm": "9.x"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.7"
+  },
+  "keywords": [
+    "ai",
+    "business-intelligence",
+    "strategy",
+    "consulting",
+    "reports"
+  ],
+  "author": "StratexAI",
+  "license": "MIT"
 }
