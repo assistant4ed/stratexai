@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: stratexai-api
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: OPENROUTER_API_KEY
+        value: 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
+      - key: GMAIL_USER
+        value: hobbychan111@gmail.com
+      - key: GMAIL_PASS
+        value: cglkzcimgnhsbphs
+      - key: GMAIL_TO
+        value: hohoho7374@gmail.com
+      - key: NODE_ENV
+        value: production
+    volumes:
+      - mountPath: /opt/render/project/server/reports
+        name: reports-storage
+        
+volumes:
+  - name: reports-storage
