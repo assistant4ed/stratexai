@@ -1,7 +1,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { handlePortalRoutes } = require('./portal');
+// Portal routes handled separately on intake.stratexai.io
+// const { handlePortalRoutes } = require('./portal');
 
 const PORT = 19001;
 const REPORTS_DIR = path.join(__dirname, 'reports');
@@ -524,9 +525,9 @@ function wrapReport(content, name) {
 const server = http.createServer(async (req, res) => {
   const url = req.url.split('?')[0];
 
-  // Portal routes (logo upload, portal view, feedback, download)
-  const portalHandled = await handlePortalRoutes(req, res, url, req.method);
-  if (portalHandled) return;
+  // Portal routes handled on intake.stratexai.io server
+  // const portalHandled = await handlePortalRoutes(req, res, url, req.method);
+  // if (portalHandled) return;
 
   if (req.method === 'GET' && (url === '/' || url === '/intake')) {
     res.writeHead(200, { 'Content-Type': 'text/html' });
