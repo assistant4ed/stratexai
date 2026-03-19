@@ -12,6 +12,8 @@ const crypto = require('crypto');
 const { generateReport, reviseReport } = require('./report-generator');
 const { handlePortalRoutes } = require('./portal');
 const db = require('./db');
+const { buildLandingPage } = require('./landing-page');
+const { buildIntakeForm } = require('./intake-form');
 
 const PORT = process.env.PORT || 19001;
 
@@ -41,8 +43,14 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
-    // GET / → Intake form
+    // GET / → Landing page (marketing homepage)
     if (method === 'GET' && pathname === '/') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(buildLandingPage());
+    }
+
+    // GET /intake → Business details form
+    if (method === 'GET' && pathname === '/intake') {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(buildIntakeForm(url.searchParams.get('order')));
     }
@@ -290,128 +298,6 @@ async function sendErrorEmail(to, errorMsg) {
 
 // ─── HTML Pages ────────────────────────────────────────────────────────────
 
-function buildIntakeForm(orderId) {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StratexAI — Business Intelligence Report</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f5f7fa; color: #1a2433; }
-  header { background: #0a1628; color: white; padding: 20px 40px; display: flex; align-items: center; gap: 16px; }
-  header h1 { font-size: 22px; font-weight: 600; }
-  header span { color: #4a9eff; }
-  .container { max-width: 860px; margin: 48px auto; padding: 0 24px; }
-  .card { background: white; border-radius: 12px; padding: 48px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
-  h2 { font-size: 26px; font-weight: 700; color: #0a1628; margin-bottom: 8px; }
-  .subtitle { color: #6b7c93; font-size: 15px; margin-bottom: 36px; border-bottom: 1px solid #e8ecf0; padding-bottom: 24px; }
-  .form-group { margin-bottom: 24px; }
-  label { display: block; font-weight: 600; font-size: 14px; color: #1a2433; margin-bottom: 8px; }
-  label .req { color: #e53e3e; }
-  input, select, textarea { width: 100%; padding: 12px 16px; border: 1.5px solid #d1d9e0; border-radius: 8px; font-size: 15px; color: #1a2433; background: #fafbfc; font-family: inherit; outline: none; }
-  input:focus, select:focus, textarea:focus { border-color: #4a9eff; background: white; }
-  textarea { resize: vertical; min-height: 100px; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .submit-btn { width: 100%; padding: 16px; background: #0a1628; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
-  .submit-btn:hover { background: #1a3050; }
-  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-  .steps { display: flex; gap: 12px; margin-bottom: 32px; }
-  .step { flex: 1; padding: 16px; background: #f5f7fa; border-radius: 8px; text-align: center; }
-  .step-num { width: 28px; height: 28px; background: #0a1628; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin: 0 auto 8px; }
-  .step-label { font-size: 12px; color: #6b7c93; font-weight: 500; }
-</style>
-</head>
-<body>
-<header>
-  <h1>Strat<span>ex</span>AI</h1>
-</header>
-<div class="container">
-  <div class="card">
-    <h2>Tell Us About Your Business</h2>
-    <p class="subtitle">We'll generate a comprehensive McKinsey-level intelligence report.</p>
-    
-    <div class="steps">
-      <div class="step"><div class="step-num">1</div><div class="step-label">Fill form</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-label">AI runs analysis</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-label">Report ready</div></div>
-    </div>
-
-    <form method="POST" action="/intake" onsubmit="handleSubmit(event)">
-      <input type="hidden" name="order_id" value="${orderId || ''}">
-      
-      <div class="row">
-        <div class="form-group">
-          <label>Email <span class="req">*</span></label>
-          <input type="email" name="email" placeholder="you@company.com" required>
-        </div>
-        <div class="form-group">
-          <label>Business Name <span class="req">*</span></label>
-          <input type="text" name="business_name" placeholder="e.g. Acme Corp" required>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="form-group">
-          <label>Industry <span class="req">*</span></label>
-          <select name="industry" required>
-            <option value="">Select...</option>
-            <option>SaaS / Software</option>
-            <option>E-commerce / Retail</option>
-            <option>FinTech</option>
-            <option>Healthcare</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Market <span class="req">*</span></label>
-          <input type="text" name="market" placeholder="e.g. Southeast Asia" required>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Business Stage</label>
-        <select name="stage">
-          <option>Early Stage</option>
-          <option>Growth Stage</option>
-          <option>Scale Stage</option>
-          <option>Enterprise</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Business Description <span class="req">*</span></label>
-        <textarea name="description" placeholder="What does your business do?" required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Challenges</label>
-        <textarea name="challenges" placeholder="Current business challenges..." style="min-height:80px;"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Opportunities</label>
-        <textarea name="opportunities" placeholder="Growth opportunities you see..." style="min-height:80px;"></textarea>
-      </div>
-
-      <button type="submit" class="submit-btn" id="submitBtn">Generate Report →</button>
-    </form>
-  </div>
-</div>
-
-<script>
-function handleSubmit(e) {
-  e.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Generating...';
-  e.target.submit();
-}
-</script>
-</body>
-</html>`;
-}
 
 function buildProcessingPage(orderId) {
   return `<!DOCTYPE html>
