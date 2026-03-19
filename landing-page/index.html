@@ -1,58 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StratexAI — AI Business Intelligence Reports</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background: #f5f0e8; color: #0a1628; line-height: 1.6; }
-header { background: #0a1628; color: white; padding: 20px 48px; display: flex; justify-content: space-between; align-items: center; }
-header h1 { font-size: 24px; font-weight: 700; }
-nav a { color: white; text-decoration: none; margin-left: 32px; font-size: 14px; }
-nav a:hover { color: #4a9eff; }
-.hero { background: linear-gradient(135deg, #0a1628, #1a3050); color: white; padding: 80px 48px; text-align: center; }
-.hero h2 { font-size: 48px; margin-bottom: 20px; font-weight: 800; }
-.hero p { font-size: 20px; margin-bottom: 40px; color: #8aabcc; }
-.cta { display: inline-block; background: white; color: #0a1628; padding: 18px 48px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px; }
-.cta:hover { background: #f5f0e8; }
-.features { max-width: 1300px; margin: 80px auto; padding: 0 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
-.feature { background: white; padding: 32px; border-radius: 12px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-.feature h3 { font-size: 20px; margin-bottom: 12px; color: #0a1628; }
-.feature p { color: #6b7c93; font-size: 14px; }
-footer { background: #0a1628; color: #8aabcc; padding: 32px 48px; text-align: center; font-size: 13px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Powered Business Intelligence</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0c12;
+      --surface:   #12151f;
+      --card:      #181c28;
+      --border:    #252a3a;
+      --accent:    #6c63ff;
+      --accent2:   #00d4aa;
+      --text:      #e8eaf0;
+      --muted:     #7a80a0;
+      --highlight: #b8bcf0;
+      --gold:      #f5c518;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 5%;
+      background: rgba(10,12,18,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 1.15rem; font-weight: 700; letter-spacing: -.3px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-cta {
+      background: var(--accent); color: #fff;
+      border: none; padding: 9px 22px; border-radius: 8px;
+      font-size: .875rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: opacity .2s;
+    }
+    .nav-cta:hover { opacity: .85; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; overflow: hidden;
+      text-align: center;
+      padding: 110px 5% 90px;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 50% -10%, rgba(108,99,255,.35) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(0,212,170,.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(108,99,255,.18); color: var(--highlight);
+      border: 1px solid rgba(108,99,255,.4);
+      padding: 5px 16px; border-radius: 50px;
+      font-size: .78rem; font-weight: 600; letter-spacing: .6px;
+      text-transform: uppercase; margin-bottom: 22px;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+      font-weight: 800; letter-spacing: -1.5px; line-height: 1.12;
+      margin-bottom: 20px;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      max-width: 580px; margin: 0 auto 36px;
+      color: var(--muted); font-size: 1.1rem; line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      color: #fff; text-decoration: none;
+      padding: 14px 32px; border-radius: 10px;
+      font-size: 1rem; font-weight: 700; letter-spacing: .2px;
+      box-shadow: 0 8px 32px rgba(108,99,255,.35);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(108,99,255,.5); }
+    .btn-ghost {
+      display: inline-block; text-decoration: none;
+      color: var(--highlight); border: 1px solid var(--border);
+      padding: 14px 28px; border-radius: 10px;
+      font-size: 1rem; font-weight: 600;
+      transition: border-color .2s, background .2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); background: rgba(108,99,255,.07); }
+
+    /* ── TRUST STRIP ── */
+    .trust-strip {
+      display: flex; justify-content: center; align-items: center;
+      flex-wrap: wrap; gap: 8px 32px;
+      padding: 26px 5%;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .85rem; font-weight: 600; color: var(--muted);
+      letter-spacing: .3px;
+    }
+    .trust-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .ti-ai   { background: rgba(108,99,255,.18); }
+    .ti-del  { background: rgba(0,212,170,.15); }
+    .ti-pay  { background: rgba(245,197,24,.12); }
+
+    /* ── SECTION ── */
+    section { padding: 80px 5%; }
+    .section-label {
+      text-align: center; margin-bottom: 10px;
+      font-size: .75rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--accent);
+    }
+    .section-title {
+      text-align: center; margin-bottom: 12px;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800; letter-spacing: -.5px;
+    }
+    .section-sub {
+      text-align: center; max-width: 500px; margin: 0 auto 56px;
+      color: var(--muted); font-size: 1rem;
+    }
+
+    /* ── CARDS ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; max-width: 1080px; margin: 0 auto;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 34px 28px 28px;
+      display: flex; flex-direction: column;
+      transition: transform .25s, border-color .25s, box-shadow .25s;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0; transition: opacity .25s;
+    }
+    .card:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 20px 60px rgba(108,99,255,.18); }
+    .card:hover::before { opacity: 1; }
+
+    .card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 8px 40px rgba(108,99,255,.2);
+    }
+    .card.featured::before { opacity: 1; }
+
+    .card-badge {
+      position: absolute; top: 18px; right: 18px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-size: .68rem; font-weight: 700;
+      letter-spacing: .8px; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 50px;
+    }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 16px;
+    }
+    .ci-1 { background: rgba(108,99,255,.18); }
+    .ci-2 { background: rgba(0,212,170,.15); }
+    .ci-3 { background: rgba(245,197,24,.12); }
+
+    .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+    .card-tagline { font-size: .85rem; color: var(--muted); margin-bottom: 20px; }
+
+    .card-price {
+      display: flex; align-items: baseline; gap: 4px; margin-bottom: 22px;
+    }
+    .price-amount {
+      font-size: 2.6rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .price-unit { font-size: .85rem; color: var(--muted); }
+
+    .card-features { list-style: none; margin-bottom: 28px; flex: 1; }
+    .card-features li {
+      padding: 7px 0; font-size: .9rem; color: var(--highlight);
+      display: flex; align-items: flex-start; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .card-features li:last-child { border-bottom: none; }
+    .card-features li::before {
+      content: '✓';
+      color: var(--accent2); font-weight: 700; font-size: .85rem;
+      flex-shrink: 0; margin-top: 1px;
+    }
+
+    .btn-buy {
+      display: block; text-align: center; text-decoration: none;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      color: #fff; font-weight: 700; font-size: .95rem;
+      padding: 13px 20px; border-radius: 10px;
+      box-shadow: 0 6px 24px rgba(108,99,255,.3);
+      transition: transform .2s, box-shadow .2s, opacity .2s;
+    }
+    .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(108,99,255,.45); }
+
+    /* ── SOCIAL PROOF ── */
+    .stats-row {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 60px;
+      padding: 50px 5%;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2.2rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 14px;
+      background: var(--card); overflow: hidden;
+    }
+    .faq-q {
+      width: 100%; background: none; border: none; color: var(--text);
+      text-align: left; cursor: pointer;
+      padding: 20px 24px; font-size: .95rem; font-weight: 600;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 16px;
+    }
+    .faq-q:hover { color: var(--highlight); }
+    .faq-arrow {
+      flex-shrink: 0; transition: transform .25s;
+      font-size: .75rem; color: var(--accent);
+    }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .35s ease, padding .35s;
+      padding: 0 24px; color: var(--muted); font-size: .9rem; line-height: 1.7;
+    }
+    .faq-item.open .faq-a { max-height: 300px; padding: 0 24px 20px; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+    /* ── CTA FOOTER ── */
+    .cta-footer {
+      text-align: center; padding: 80px 5%;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .cta-footer h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800; margin-bottom: 14px; letter-spacing: -.5px;
+    }
+    .cta-footer p { color: var(--muted); max-width: 460px; margin: 0 auto 32px; }
+
+    footer {
+      padding: 24px 5%; text-align: center;
+      color: var(--muted); font-size: .8rem;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--muted); }
+  </style>
 </head>
 <body>
-<header>
-  <h1>StratexAI</h1>
-  <nav>
-    <a href="#features">Features</a>
-    <a href="#pricing">Pricing</a>
-    <a href="#contact">Contact</a>
-  </nav>
-</header>
-<div class="hero">
-  <h2>McKinsey-Level Business Intelligence</h2>
-  <p>Get professional market research, competitor analysis, and strategic reports powered by AI</p>
-  <a href="/order" class="cta">Get Your Report →</a>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">⚡ StratexAI</span>
+  <a href="#pricing" class="nav-cta">See Pricing →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">🚀 AI-Driven Intelligence for Modern Business</div>
+  <h1>AI-Powered<br><span>Business Intelligence</span></h1>
+  <p>Turn raw data into strategic decisions. Get AI-generated reports, weekly intelligence briefings, and expert automation consultation — delivered instantly.</p>
+  <div class="hero-actions">
+    <a href="#pricing" class="btn-primary">Get Started Today</a>
+    <a href="#faq" class="btn-ghost">Learn More</a>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-item">
+    <div class="trust-icon ti-ai">🤖</div>
+    Powered by AI
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon ti-del">⚡</div>
+    Instant Delivery
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon ti-pay">🔒</div>
+    Stripe Secured
+  </div>
+  <div class="trust-item">
+    <div class="trust-icon" style="background:rgba(239,68,68,.12)">✅</div>
+    100% Satisfaction Guarantee
+  </div>
 </div>
-<div class="features" id="features">
-  <div class="feature">
-    <h3>Market Analysis</h3>
-    <p>TAM sizing, growth trends, competitive positioning</p>
-  </div>
-  <div class="feature">
-    <h3>Competitor Deep-Dive</h3>
-    <p>SWOT analysis, pricing strategies, differentiation</p>
-  </div>
-  <div class="feature">
-    <h3>Strategic Roadmap</h3>
-    <p>Actionable recommendations, 90-day plans</p>
-  </div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Reports Delivered</div></div>
+  <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Client Satisfaction</div></div>
+  <div class="stat"><div class="stat-num">&lt;5min</div><div class="stat-label">Avg. Delivery Time</div></div>
+  <div class="stat"><div class="stat-num">$0</div><div class="stat-label">Setup Fee</div></div>
 </div>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2 class="section-title">Choose Your Intelligence Package</h2>
+  <p class="section-sub">No subscriptions. No lock-in. Pay once, get instant value.</p>
+
+  <div class="cards-grid">
+
+    <!-- Card 1: AI Business Report -->
+    <div class="card">
+      <div class="card-icon ci-1">📊</div>
+      <div class="card-title">AI Business Report</div>
+      <div class="card-tagline">Deep-dive analysis on demand</div>
+      <div class="card-price">
+        <span class="price-amount">$29</span>
+        <span class="price-unit">one-time</span>
+      </div>
+      <ul class="card-features">
+        <li>Comprehensive AI-generated business analysis report</li>
+        <li>Competitor landscape & market positioning insights</li>
+        <li>Data-backed strategic recommendations</li>
+        <li>Executive summary + full detail breakdown</li>
+        <li>Delivered as a polished PDF within minutes</li>
+      </ul>
+      <a href="https://buy.stripe.com/aFa4gybszbJodFB3KggQE01" class="btn-buy">Buy Now — $29</a>
+    </div>
+
+    <!-- Card 2: AI Weekly Intelligence Pack (featured) -->
+    <div class="card featured">
+      <div class="card-badge">Most Popular</div>
+      <div class="card-icon ci-2">📡</div>
+      <div class="card-title">AI Weekly Intelligence Pack</div>
+      <div class="card-tagline">Stay ahead of your industry</div>
+      <div class="card-price">
+        <span class="price-amount">$49</span>
+        <span class="price-unit">one-time</span>
+      </div>
+      <ul class="card-features">
+        <li>4-week curated industry intelligence briefings</li>
+        <li>Trending opportunities & emerging threats radar</li>
+        <li>AI-summarised news, data, and signals that matter</li>
+        <li>Actionable weekly insights formatted for decision-makers</li>
+        <li>Priority email delivery every Monday morning</li>
+      </ul>
+      <a href="https://buy.stripe.com/7sYbJ0bsz5l00SPgx2gQE02" class="btn-buy">Buy Now — $49</a>
+    </div>
+
+    <!-- Card 3: AI Automation Consultation -->
+    <div class="card">
+      <div class="card-icon ci-3">⚙️</div>
+      <div class="card-title">AI Automation Consultation</div>
+      <div class="card-tagline">Expert guidance for your workflow</div>
+      <div class="card-price">
+        <span class="price-amount">$99</span>
+        <span class="price-unit">one-time</span>
+      </div>
+      <ul class="card-features">
+        <li>60-minute 1-on-1 AI strategy & automation session</li>
+        <li>Custom automation roadmap tailored to your business</li>
+        <li>Tool stack recommendations (n8n, Zapier, custom AI)</li>
+        <li>ROI estimate and implementation priority matrix</li>
+        <li>30-day follow-up support via email</li>
+      </ul>
+      <a href="https://buy.stripe.com/eVqaEW9kr9Bg5954OkgQE03" class="btn-buy">Buy Now — $99</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="background: var(--surface);">
+  <div class="section-label">FAQ</div>
+  <h2 class="section-title">Frequently Asked Questions</h2>
+  <p class="section-sub">Got questions? We've got clear answers.</p>
+
+  <div class="faq-list">
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How quickly will I receive my report or briefing?
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        For AI Business Reports and Intelligence Packs, delivery is near-instant — most customers receive their content within 5 minutes of payment. For the Automation Consultation, you'll receive a calendar invite within 24 hours to schedule your session at a time that suits you.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Is my payment information secure?
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Absolutely. All payments are processed by Stripe — the world's leading payment infrastructure, trusted by millions of businesses. We never store your card details. Transactions are encrypted end-to-end using bank-grade TLS security.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What if I'm not satisfied with my purchase?
+        <span class="faq-arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        We stand behind everything we deliver. If you're not satisfied within 7 days of purchase, contact us for a full refund — no questions asked. We're confident in the quality of our AI-powered outputs, but your satisfaction comes first.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA FOOTER -->
+<div class="cta-footer">
+  <h2>Ready to Elevate Your Business Intelligence?</h2>
+  <p>Join hundreds of forward-thinking businesses already using AI to outpace the competition.</p>
+  <a href="#pricing" class="btn-primary">View All Packages →</a>
+</div>
+
+<!-- FOOTER -->
 <footer>
-  © 2026 StratexAI · <a href="mailto:hello@stratexai.io" style="color:#4a9eff;">hello@stratexai.io</a>
+  <p>© 2026 StratexAI · All rights reserved · 
+    <span style="margin: 0 8px;">🔒 Stripe Secured</span> · 
+    <span>⚡ Instant Delivery</span>
+  </p>
 </footer>
+
+<script>
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+</script>
+
 </body>
 </html>
